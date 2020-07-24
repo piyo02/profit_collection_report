@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="profit_coll_report_form_view" model="ir.ui.view">
+            <field name="name">account.profit.report.form.view</field>
+            <field name="model">account.profit.report</field>
+            <field name="arch" type="xml">
+                <form string="Profit Collection Report">
+                    <group>
+                        <group>
+                            <field name="start_date"/>
+                        </group>
+                        <group>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+
+                    <footer>
+                        <button name="print_profit_coll_report" string="Print Report" class="oe_highlight"
+                                type="object"/>
+                        Or
+                        <button string="Cancel" class="btn-default" special="cancel"/>
+                    </footer>
+                </form>
+
+
+            </field>
+        </record>
+
+        <record id="action_profit_coll_report_wizard" model="ir.actions.act_window">
+            <field name="name">Profit Collection Report</field>
+            <field name="res_model">account.profit.report</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <menuitem id="menu_purchase_report_wizard"
+                  name="Profit Collection Report"
+                  action="action_profit_coll_report_wizard"
+                  parent="account.menu_finance_legal_statement" 
+                  sequence="1"/>
+
+    </data>
+</odoo>

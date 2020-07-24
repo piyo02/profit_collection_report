@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <report
+                id="action_profit_coll_report"
+                string="Profit Collection Report"
+                model="account.profit.report"
+                report_type="qweb-pdf"
+                file="profit_collection_report.account_report_temp"
+                name="profit_collection_report.account_report_temp"
+        />
+    </data>
+</odoo>

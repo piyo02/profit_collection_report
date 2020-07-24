@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="account_report_temp">
+        <t t-call="report.external_layout">
+            <div class="page">
+                <div class="oe_structure"/>
+                    <div class="row">
+                    <center>
+                        <b>
+                            <h4>Laporan Profit Collection</h4>
+                        </b>
+                    </center>
+                    <center>
+                        <b>
+                            <span t-esc="start_date"/>
+                            To
+                            <span t-esc="end_date"/>
+                        </b>
+                    </center>
+                </div>
+                <br/>
+                <t t-set="total_amount" t-value="0"/>
+                <t t-set="total_hpp" t-value="0"/>
+                <t t-set="total_margin" t-value="0"/>
+
+                    <table class="table table-condensed table-striped">
+                        <thead >
+                            <tr>
+                                <th>No Invoice</th>
+                                <th>Sale Order</th>
+                                <th>Tanggal</th>
+                                <th>Pelanggan</th>
+                                <th class="text-right">Diskon</th>
+                                <th class="text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="data" t-as="invoice">
+                                <tr>
+                                    <td>
+                                        <span t-esc="invoice[0]"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="invoice[1]"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="invoice[2]"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="invoice[3]"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-esc="invoice[4]"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-esc="'{:,}'.format(invoice[5])"/>.00
+                                        <t t-set="total_amount" t-value="total_amount + invoice[5]"/>
+                                        <t t-set="total_hpp" t-value="total_hpp + invoice[6]"/>
+                                        <t t-set="total_margin" t-value="total_margin + invoice[7]"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                <div class="row">
+                    <div class="col-xs-4 pull-right">
+                        <table class="table table-condensed" style="page-break-after: always;">
+                            <tr>
+                                <td><strong>Total Tagihan</strong></td>
+                                <td class="text-right">
+                                    <span t-esc="'{:,}'.format(total_amount)"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total HPP</strong></td>
+                                <td class="text-right">
+                                    <span t-esc="'{:,}'.format(total_hpp)"/>
+                                </td>
+                            </tr>
+                            <tr class="border-dark">
+                                <td><strong>Margin</strong></td>
+                                <td class="text-right">
+                                    <span t-esc="'{:,}'.format(total_margin)"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>
