@@ -11,58 +11,119 @@ class ProfitCollectionReport(models.TransientModel):
     
     @api.multi
     def print_profit_coll_report(self):
-        invoices = self.env['account.invoice'].search(
+        payments = self.env['account.payment'].search(
             [ 
-                ('date_invoice', '<=', self.end_date),
-                ('date_invoice', '>=', self.start_date),
-                ('state', '=', 'paid'),
-                ('type', '=', 'out_invoice'),
+                ('payment_date', '<=', self.end_date),
+                ('payment_date', '>=', self.start_date),
+                ('payment_type', '=', 'inbound'),
+                ('state', '=', 'posted'),
             ], 
-            order="date_invoice asc")
+            order="payment_date asc")
 
-        invoice_data = []
-        for invoice in invoices:
+        payment_data = []
+        for payment in payments:
             temp = []
-            hpp_invoice = 0
+            hpp_payment = 0
             total_disc = 0
             
-            so = self.env['sale.order'].search([
-                ('name', '=', invoice.origin)
-            ])
+            if payment.has_invoices:
+                memo_type = payment.communication
 
-            total_so = so.amount_total
-            percent = (invoice.amount_total*100) / total_so
+                if 'INV' in memo_type:
+                    invoices = self.env['account.invoice'].search([
+                        ('number', '=', payment.communication),
+                        ('state', '=', 'paid')
+                    ])
+                    so = self.env['sale.order'].search([
+                        ('name', '=', invoices.origin)
+                    ])
 
-            for order_line in so.order_line:
-                modal = order_line.product_id.product_tmpl_id.standard_price
-                quantity = order_line.product_uom_qty
+                elif 'SO' in memo_type:
+                    so = self.env['sale.order'].search([
+                        ('name', '=', payment.communication)
+                    ])
+                    invoices = self.env['account.invoice'].search([
+                        ('origin', '=', so.name),
+                        ('state', '=', 'paid')
+                    ])
+
+                _logger.warning("sale order")
+                _logger.warning(payment.communication)
                 
-                hpp_per_product = modal*quantity
-                hpp_invoice += hpp_per_product
+                for order_line in so.order_line:
+                    modal = order_line.product_id.product_tmpl_id.standard_price
+                    quantity = order_line.product_uom_qty
+                    
+                    hpp_per_product = modal*quantity
+                    hpp_payment += hpp_per_product
 
-            for invoice_line in invoice.invoice_line_ids:
-                total_disc += invoice_line.discount
+                for invoice in invoices:
+                    for invoice_line in invoice.invoice_line_ids:
+                        total_disc += invoice_line.discount
+
+                    total_so = so.amount_total
+                    percent = (invoice.amount_total*100) / total_so
+
+                    if percent != 100:
+                        hpp_payment = (hpp_payment*percent)/100
+                    
+                    margin = payment.amount - hpp_payment
+
+                    payment_number = payment.communication
+                    origin = invoice.origin
+
+                    temp.append(invoice.number) #0
+                    temp.append(origin) #1
+                    temp.append(payment.payment_date) #2
+                    temp.append(payment.partner_id.display_name) #3
+                    temp.append(total_disc) #4
+                    temp.append(payment.amount) #5
+                    temp.append(hpp_payment) #6
+                    temp.append(margin) #7
+                    
+                    payment_data.append(temp)
+            else:
+                margin = payment.amount - hpp_payment
+                payment_number = payment.name
+                origin = ""
+
+                temp.append(payment_number) #0
+                temp.append(origin) #1
+                temp.append(payment.payment_date) #2
+                temp.append(payment.partner_id.display_name) #3
+                temp.append(total_disc) #4
+                temp.append(payment.amount) #5
+                temp.append(hpp_payment) #6
+                temp.append(margin) #7
+            
+                payment_data.append(temp)
+            
+        giros = self.env['vit.giro'].search(
+            [ 
+                ('clearing_date', '<=', self.end_date),
+                ('clearing_date', '>=', self.start_date),
+                ('type', '=', 'receipt'),
+                ('state', '=', 'close'),
+            ], 
+            order="clearing_date asc")
         
-            if percent != 100:
-                hpp_invoice = (hpp_invoice*percent)/100
-            
-            margin = invoice.amount_total - hpp_invoice
-
-            temp.append(invoice.number) #0
-            temp.append(invoice.origin) #1
-            temp.append(invoice.date_invoice) #2
-            temp.append(invoice.partner_id.display_name) #3
-            temp.append(total_disc) #4
-            temp.append(invoice.amount_total) #5
-            temp.append(hpp_invoice) #6
-            temp.append(margin) #7
-            
-            invoice_data.append(temp)
-            
+        for giro in giros:
+            temp = []
+            temp.append(giro.name) #0
+            temp.append("") #1
+            temp.append(giro.clearing_date) #2
+            temp.append(giro.partner_id.display_name) #3
+            temp.append(0) #4
+            temp.append(giro.amount) #5
+            temp.append(0) #6
+            temp.append(giro.amount) #7
+        
+            payment_data.append(temp)
+        
         datas = {
             'ids': self.ids,
             'model': 'invoice.profit.report',
-            'form': invoice_data,
+            'form': payment_data,
             'start_date': self.start_date,
             'end_date': self.end_date,
 
