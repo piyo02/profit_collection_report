@@ -50,10 +50,10 @@
                                         <span t-esc="invoice[3]"/>
                                     </td>
                                     <td class="text-right">
-                                        <span t-esc="invoice[4]"/>
+                                        <span t-esc="'{:,.2f}'.format(invoice[4])"/>
                                     </td>
                                     <td class="text-right">
-                                        <span t-esc="'{:,}'.format(invoice[5])"/>.00
+                                        <span t-esc="'{:,.2f}'.format(invoice[5])"/>
                                         <t t-set="total_amount" t-value="total_amount + invoice[5]"/>
                                         <t t-set="total_hpp" t-value="total_hpp + invoice[6]"/>
                                         <t t-set="total_margin" t-value="total_margin + invoice[7]"/>
@@ -69,19 +69,19 @@
                             <tr>
                                 <td><strong>Total Tagihan</strong></td>
                                 <td class="text-right">
-                                    <span t-esc="'{:,}'.format(total_amount)"/>
+                                    <span t-esc="'{:,.2f}'.format(total_amount)"/>
                                 </td>
                             </tr>
                             <tr>
                                 <td><strong>Total HPP</strong></td>
                                 <td class="text-right">
-                                    <span t-esc="'{:,}'.format(total_hpp)"/>
+                                    <span t-esc="'{:,.2f}'.format(total_hpp)"/>
                                 </td>
                             </tr>
                             <tr class="border-dark">
                                 <td><strong>Margin</strong></td>
                                 <td class="text-right">
-                                    <span t-esc="'{:,}'.format(total_margin)"/>
+                                    <span t-esc="'{:,.2f}'.format(total_margin)"/>
                                 </td>
                             </tr>
                         </table>
