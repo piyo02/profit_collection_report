@@ -47,9 +47,6 @@ class ProfitCollectionReport(models.TransientModel):
                         ('state', '=', 'paid')
                     ])
 
-                _logger.warning("sale order")
-                _logger.warning(payment.communication)
-                
                 for order_line in so.order_line:
                     modal = order_line.product_id.product_tmpl_id.standard_price
                     quantity = order_line.product_uom_qty
