@@ -50,8 +50,21 @@ class ProfitCollectionReport(models.TransientModel):
                 for order_line in so.order_line:
                     modal = order_line.product_id.product_tmpl_id.standard_price
                     quantity = order_line.product_uom_qty
+
+                    uom_so = order_line.product_uom
+                    uom_product = order_line.product_id.product_tmpl_id.uom_id
                     
-                    hpp_per_product = modal*quantity
+                    qty_uom = 1
+                    if(uom_product.name != uom_so.name):
+                        factor_uom = 1
+                        if(uom_product.factor):
+                            factor_uom = uom_product.factor
+                        
+                        qty_uom = uom_so.factor_inv*factor_uom
+
+                    _logger.warning(qty_uom)
+
+                    hpp_per_product = modal*quantity*qty_uom
                     hpp_payment += hpp_per_product
 
                 for invoice in invoices:
