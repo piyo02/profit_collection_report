@@ -62,8 +62,6 @@ class ProfitCollectionReport(models.TransientModel):
                         
                         qty_uom = uom_so.factor_inv*factor_uom
 
-                    _logger.warning(qty_uom)
-
                     hpp_per_product = modal*quantity*qty_uom
                     hpp_payment += hpp_per_product
 
