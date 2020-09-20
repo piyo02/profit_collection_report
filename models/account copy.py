@@ -47,17 +47,50 @@ class ProfitCollectionReport(models.TransientModel):
                         ('state', '=', 'paid')
                     ])
 
-                for invoice in invoices:
-                    for invoice_line in invoice.invoice_line_ids:
-                        
-                        account_move = self.env['account.move'].search([
-                            ('name', '=', invoice.number),
-                        ])
-                        for line in account_move.line_ids:
-                            if(line.account_id.code[0] == '5' and line.product_id.name == invoice_line.product_id.name):
-                                hpp_payment += line.debit
+                # for order_line in so.order_line:
+                #     modal = order_line.product_id.product_tmpl_id.standard_price
+                #     quantity = order_line.product_uom_qty
 
+                #     uom_so = order_line.product_uom
+                #     uom_product = order_line.product_id.product_tmpl_id.uom_id
+                    
+                #     qty_uom = 1
+                #     if(uom_product.name != uom_so.name):
+                #         factor_uom = 1
+                #         if(uom_product.factor):
+                #             factor_uom = uom_product.factor
+                        
+                #         qty_uom = uom_so.factor_inv*factor_uom
+
+                #     hpp_per_product = modal*quantity*qty_uom
+                #     hpp_payment += hpp_per_product
+
+                for invoice in invoices:
+                    code = {}
+                    account_move = self.env['account.move'].search([
+                        ('name', '=', invoice.number),
+                    ])
+                    for line in account_move.line_ids:
+                        if(line.account_id.code[0] == '5'):
+                            _logger.warning(line.account_id.code[0] == '5')
+                            # _logger.warning(line.product_id.id)
+                            code[line.product_id.id] = line.debit/line.quantity
+                    
+                    for invoice_line in invoice.invoice_line_ids:
                         total_disc += invoice_line.discount
+                        
+                        uom_invoice = invoice_line.uom_id
+                        uom_product = invoice_line.product_id.product_tmpl_id.uom_id
+
+                        qty_uom = 1
+                        if(uom_product.name != uom_invoice.name):
+                            factor_uom = 1
+                            if(uom_product.factor):
+                                factor_uom = uom_product.factor
+                            qty_uom = uom_invoice.factor_inv*factor_uom
+                        
+                        hpp_per_product = code[invoice_line.product_id.id]/qty_uom
+                        hpp_payment += hpp_per_product
 
                     total_so = so.amount_total
                     percent = (invoice.amount_total*100) / total_so
