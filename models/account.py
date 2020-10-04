@@ -59,7 +59,7 @@ class ProfitCollectionReport(models.TransientModel):
 
                         total_disc += invoice_line.discount
 
-                    total_so = so.amount_total
+                    total_so = so.amount_total or invoice.amount_total
                     percent = (invoice.amount_total*100) / total_so
 
                     if percent != 100:
